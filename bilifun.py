@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Fri Aug 19  22:59:00 2018
@@ -22,7 +22,7 @@ def main():
         if aid:
             aid = int(aid.group(1))
         else:
-            print('查找视频av号失败!')
+            logging.error('查找视频av号失败 >_<')
         pid = 1
     mpvPlayVideo(aid, pid)
 

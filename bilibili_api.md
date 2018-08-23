@@ -503,10 +503,10 @@ def getDanmuku(cid):
 def danmaku2ass(xmlfile, asspath=os.path.expanduser('~')+'/Desktop/'):
 ```
 
-* 弹幕xml转换成ass格式, 注意路径使用原始字符串
+* 弹幕xml转换成ass格式
 * 输入:
     * xmlfile: 弹幕xml文件地址
-    * asspath: 转换成ass保存地址, 默认asspath地址为桌面
+    * asspath: 转换成ass保存地址, 默认asspath地址为当前路径
 * 备注:
     * ass文件名与xml文件相同
 * 依赖:
@@ -522,7 +522,7 @@ def saveDanmuku(cid, path=os.path.expanduser('~')+'/Desktop/'):
 * 指定路径保存弹幕为ass文件
 * 输入:
     * cid: 弹幕池号
-    * path: 保存弹幕ass文件地址, 默认在桌面
+    * path: 保存弹幕ass文件地址, 默认为当前路径
 * 备忘:
     * 保存的ass文件名为cid
 * 依赖:

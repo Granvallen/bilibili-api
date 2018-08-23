@@ -477,7 +477,7 @@ def mpvPlayVideo(aid, pid=1):
     video = getVideoInfo(aid, pid)
     logging.info('弹幕装填中...')
     saveDanmuku(video.cid)
-    assfile = os.path.expanduser('~') + r'\Desktop\{}.ass'.format(video.cid)
+    assfile = r'./{}.ass'.format(video.cid)
     index_title = ''
     logging.info('解析视频地址...')
     if video:
@@ -511,12 +511,12 @@ def getDanmuku(cid):
     content = str(zlib.decompressobj(-zlib.MAX_WBITS).decompress(getURLContent(url)), 'utf-8')
     return content
 
-def danmaku2ass(xmlfile, asspath=os.path.expanduser('~')+'/Desktop/'):
+def danmaku2ass(xmlfile, asspath='./'):
     """
     弹幕xml转换成ass格式, 注意路径使用原始字符串
     输入:
         xmlfile: 弹幕xml文件地址
-        asspath: 转换成ass保存地址, 默认asspath地址为桌面
+        asspath: 转换成ass保存地址, 默认asspath地址为当前路径
     备注:
         ass文件名与xml文件相同
     依赖:
@@ -535,12 +535,12 @@ def danmaku2ass(xmlfile, asspath=os.path.expanduser('~')+'/Desktop/'):
         return
     logging.info('弹幕转换成功 >v<')
 
-def saveDanmuku(cid, path=os.path.expanduser('~')+'/Desktop/'):
+def saveDanmuku(cid, path='./'):
     """
     指定路径保存弹幕为ass文件
     输入:
         cid: 弹幕池号
-        path: 保存弹幕ass文件地址, 默认在桌面
+        path: 保存弹幕ass文件地址, 默认为当前路径
     备忘:
         保存的ass文件名为cid
     依赖:
@@ -554,6 +554,7 @@ def saveDanmuku(cid, path=os.path.expanduser('~')+'/Desktop/'):
     fp.close()
     danmaku2ass(xmlfile, path)
     os.remove(xmlfile)
+
 
 
 
