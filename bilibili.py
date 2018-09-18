@@ -154,7 +154,7 @@ def getVideoInfo(aid, pid=1):
         for tag in iter(jsoninfo['tags']):
             video.tag.append(tag['tag_name'])
         # 获取视频热度信息 播放量 硬币 收藏 评论 分享 弹幕
-        jsoninfo = getVedioStat(video.aid)
+        jsoninfo = getVideoStat(video.aid)
         video.play = jsoninfo['view']
         video.danmaku = jsoninfo['danmaku']
         video.review = jsoninfo['reply']
@@ -186,7 +186,7 @@ def getVideoInfo(aid, pid=1):
         episode.ep_id = jsoninfo['epInfo', 'ep_id']
         episode.vid = jsoninfo['epInfo', 'vid']
         # 获取剧集热度信息 播放量 硬币 收藏 评论 分享 弹幕   这是单一剧集的热度 而不是整个番剧的
-        jsoninfo = getVedioStat(episode.aid)
+        jsoninfo = getVideoStat(episode.aid)
         episode.play = jsoninfo['view']
         episode.danmaku = jsoninfo['danmaku']
         episode.review = jsoninfo['reply']
@@ -373,7 +373,7 @@ def biliBangumiSearch(keyword, page=1):
         bangumis.append(bangumi)
     return bangumis
 
-def getVedioStat(aid):
+def getVideoStat(aid):
     """
     获取视频的热度信息, 番剧通用
     输入:
@@ -489,7 +489,7 @@ def mpvPlayVideo(aid, pid=1):
         paraurls = ''
         for val in srcurls:
             paraurls += '"{}"'.format(val) + ' '
-        cmd = 'mpv --http-header-fields="Referer:https://www.bilibili.com" --merge-files --force-media-title="{} {}" --sub-file="{}" {}'.format(video.title, index_title, assfile, paraurls)
+        cmd = 'mpv --http-header-fields="Referer:https://www.bilibili.com/" --merge-files --force-media-title="{} {}" --sub-file="{}" {}'.format(video.title, index_title, assfile, paraurls)
     else:
         logging.error('获取视频信息失败 >_<')
         return
@@ -562,6 +562,4 @@ def saveDanmuku(cid, path='./'):
 if __name__ == "__main__":
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
     mpvPlayVideo(28463616)
-    # logging.info('弹幕装填中...')
     pass
-
