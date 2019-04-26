@@ -9,6 +9,7 @@ Created on Fri Aug 19  22:59:00 2018
 from bilibili import *
 import os
 
+
 def main():
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
     aid = getREsearch(sys.argv[1], r'av(\d+)')

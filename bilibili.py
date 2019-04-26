@@ -4,7 +4,6 @@ Created on Fri Aug 17  16:34:00 2018
 
 @author: Granvallen
 """
-
 from support import *
 from biclass import *
 from danmaku2ass import Danmaku2ASS
@@ -178,7 +177,8 @@ def getVideoInfo(aid, pid=1):
         episode.index_title = jsoninfo['epInfo', 'index_title']
         episode.index = jsoninfo['epInfo', 'index']
         episode.pub_real_time = jsoninfo['epInfo', 'pub_real_time'] # 看下这里pubtime有没有可能为字符串
-        episode.duration = num2duration(jsoninfo['epInfo', 'duration'] // 1000)
+        # 新版返回的api返回的json中没有视频时长信息 只能通过解析xml方式获得
+        # episode.duration = num2duration(jsoninfo['epInfo', 'duration'] // 1000)
         episode.mid = jsoninfo['epInfo', 'mid']
         episode.cid = jsoninfo['epInfo', 'cid']
         episode.media_id = jsoninfo['mediaInfo', 'media_id']
@@ -433,9 +433,10 @@ def getVideoSrcurl(cid):
         由视频源地址构成的列表, 因为部分太长视频是分片的, 故有好几个地址, 获取失败返回None
     """
     video_api_url = 'http://interface.bilibili.com/v2/playurl?'
-    secretkey = '94aba54af9065f71de72f5508f1cd42e'
-    params = 'appkey=84956560bc028eb7&cid={0}&otype=json&qn=80&quality=80&type='.format(cid)
+    secretkey = 'aHRmhWMLkdeMuILqORnYZocwMBpMEOdt'
+    params = 'appkey=iVGUTjsxvpLeuDCf&cid={0}&otype=json&qn=80&quality=80&type='.format(cid)
     api_url = video_api_url + params + '&sign=' + getSign(params, secretkey)
+
     jsoninfo = JsonInfo(getURLContent(api_url))
     if jsoninfo.error:
         return None
@@ -549,17 +550,16 @@ def saveDanmuku(cid, path='./'):
     """
     content = getDanmuku(cid)
     xmlfile = path + '{0}.xml'.format(cid)
-    fp = open(xmlfile, 'w', encoding='utf-8')
-    fp.write(content)
-    fp.close()
+    with open(xmlfile, 'w', encoding='utf-8') as fp:
+        fp.write(content)
     danmaku2ass(xmlfile, path)
     os.remove(xmlfile)
 
 
 
-
-
 if __name__ == "__main__":
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
-    mpvPlayVideo(28463616)
+    mpvPlayVideo(28463616) # 普通视频测试
+    # mpvPlayVideo(33160847) # 番剧测试
+    # a = biliBangumiSearch("jojo")
     pass
