@@ -1,3 +1,5 @@
+[TOC]
+
 # 1.获取热门视频排行榜:
 ## API
 ```
@@ -40,10 +42,10 @@ def getHotVideo(begintime, endtime, tid=33, sortType=TYPE_BOFANG, page=1, pagesi
     * 这个搜索视频的api只能用 `二级分区代号`
 
 
-###参数详细说明: 
+### 参数详细说明: 
 好多参数几个函数都是相同的
 
-####sortType: 排序方式
+#### sortType: 排序方式
 * 收藏: TYPE_SHOUCANG
 * 评论数: TYPE_PINGLUN
 * 播放数: TYPE_BOFANG
@@ -51,7 +53,7 @@ def getHotVideo(begintime, endtime, tid=33, sortType=TYPE_BOFANG, page=1, pagesi
 * 弹幕数: TYPE_DANMU
 * **投稿时间**: TYPE_TOUGAO (从新到旧排列)
 
-####tid: 分区代号
+#### tid: 分区代号
 * 全站 0
 * **动画**: 1
     * AMD·AMV: 24
@@ -224,8 +226,18 @@ http://bangumi.bilibili.com/player/web_api/playurl?cid={弹幕池号}&module=ban
 **注意**: 此API需要计算sign所用的secretkey, 此API我是参考了[you-get](https://github.com/soimort/you-get)项目的, **请勿滥用**. 此处sign的算法可见`getEpisodeSrcurl`与`getSign`函数
 **注意**: 此API只能获取xml格式信息, 应该是旧版的API, 新版API地址为`https://bangumi.bilibili.com/player/web_api/v2/playurl?`, 但目前不知secretkey有待更新
 
-
 ## API函数
+
+## 获取视频aid(av号)
+
+```python
+def getAid(url):
+```
+
+- 输入:
+    - url: 视频url
+- 返回:
+    - aid: 视频av号
 
 ### 获取视频热度信息
 ```python
@@ -529,7 +541,7 @@ def saveDanmuku(cid, path=os.path.expanduser('~')+'/Desktop/'):
     * getDanmuku()
     * danmaku2ass()
 
---- 
+---
 
 # 其他函数
 ## 调用mpv播放视频
@@ -545,7 +557,7 @@ def mpvPlayVideo(aid, pid=1):
 * 依赖:
     * mpv
 
---- 
+---
 
 # 简单应用: 一个用mpv播放B站视频的脚本bilifun.py
 使用方法

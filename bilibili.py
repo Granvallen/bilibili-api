@@ -373,6 +373,37 @@ def biliBangumiSearch(keyword, page=1):
         bangumis.append(bangumi)
     return bangumis
 
+def getAid(url):
+    """
+    获取链接地址视频aid(av号)
+    输入:
+        视频url
+    返回:
+        视频aid(int)
+    """
+
+    aid = getREsearch(url, r'av(\d+)')
+    if aid:
+        aid = int(aid.group(1))
+        return aid
+    else:
+        content = getURLContent(url)
+        VideoInfo = getREsearch(content, r'<script>window.__INITIAL_STATE__=({.*});\(')
+
+        if VideoInfo:
+            VideoInfo = VideoInfo.group(1)
+        else:
+            print('正则表达式寻找视频信息失败 >_<')
+            return None
+        jsoninfo = JsonInfo(VideoInfo)
+        if jsoninfo.error or not jsoninfo['epInfo', 'aid']:
+            logging.error('查找视频av号失败 >_<')
+            return None
+        
+        aid = jsoninfo['epInfo', 'aid']
+        return aid
+
+
 def getVideoStat(aid):
     """
     获取视频的热度信息, 番剧通用
@@ -559,7 +590,8 @@ def saveDanmuku(cid, path='./'):
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
-    mpvPlayVideo(28463616) # 普通视频测试
+    # mpvPlayVideo(28463616) # 普通视频测试
     # mpvPlayVideo(33160847) # 番剧测试
+    getAid("https://www.bilibili.com/bangumi/play/ep267864?spm_id_from=333.334.b_72616e6b696e675f74696d696e675f62616e67756d69.1")
     # a = biliBangumiSearch("jojo")
     pass
