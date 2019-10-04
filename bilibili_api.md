@@ -156,8 +156,8 @@ def getHotVideo(begintime, endtime, tid=33, sortType=TYPE_BOFANG, page=1, pagesi
 * video.arcurl
 * video.tag
 * video.danmaku
-* video.author
-* video.favorites
+* video.name
+* video.favorite
 * video.duration
 * video.type
 
@@ -175,9 +175,10 @@ https://api.bilibili.com/x/web-interface/archive/stat?aid={av号}
 ```
 返回json
 包含字段:
-* 'view' : 播放数
+
+* 'play' : 播放数 之前的view弃用
 * 'danmaku' : 弹幕数
-* 'reply' : 评论数
+* 'review' : 评论数 之前的reply弃用
 * 'favorite' : 收藏数
 * 'coin' : 硬币数
 * 'share' : 分享数
@@ -204,6 +205,7 @@ https://interface.bilibili.com/player?id=cid:49247744&aid=28463616
 ```
 
 ### 获取视频(非番剧)源地址
+
 ```
 http://interface.bilibili.com/v2/playurl?appkey={appkey}&cid={弹幕池号}&otype={返回类型, json或xml}&qn={视频质量}&quality={视频质量}&type=&sign={签名}
 ```
@@ -214,11 +216,12 @@ http://interface.bilibili.com/v2/playurl?appkey={appkey}&cid={弹幕池号}&otyp
 * 32: 480p
 * 16: 360p
 
-1080+p大会员用户专享, 普通用户在登陆状态下最高可观看1080p, 在未登陆情况下通常480p. 此API可可获取大会员1080+p以下的清晰度, 即最高1080p(具体还要受限于实际上传视频的清晰度).
+在网站上1080+p大会员用户专享, 普通用户在登陆状态下最高可观看1080p, 在未登陆情况下通常480p. 此API可获取大会员1080+p以下的清晰度, 即最高1080p(具体还要受限于实际上传视频的清晰度).
 
 **注意**: 此API需要appkey与计算sign所用的secretkey, 这两个key需要申请, 此API我是参考了[you-get](https://github.com/soimort/you-get)项目的, **故请勿滥用**. 此处sign的算法可见`getVideoSrcurl`与`getSign`函数
 
 ### 获取剧集视频源地址(包括番剧, 电影等)
+
 ```
 http://bangumi.bilibili.com/player/web_api/playurl?cid={弹幕池号}&module=bangumi&player=1&qn={视频质量}&ts={1}&sign={签名}
 ```
@@ -228,7 +231,7 @@ http://bangumi.bilibili.com/player/web_api/playurl?cid={弹幕池号}&module=ban
 
 ## API函数
 
-## 获取视频aid(av号)
+### 获取视频aid(av号)
 
 ```python
 def getAid(url):
@@ -240,6 +243,7 @@ def getAid(url):
     - aid: 视频av号
 
 ### 获取视频热度信息
+
 ```python
 def getVedioStat(aid):
 ```
@@ -339,7 +343,7 @@ def getVideoInfo(aid, pid=1):
 * episode.index_title
 * episode.index
 * episode.pub_real_time
-* episode.duration
+* ~~episode.duration~~
 * episode.mid
 * episode.cid
 * episode.media_id
@@ -357,7 +361,7 @@ def getVideoInfo(aid, pid=1):
 * episode.his_rank
 * episode.copyright
 * episode.online_count
-* episode.link
+* episode.arcurl
 * episode.srcurl
 
 ---
@@ -394,8 +398,8 @@ Video类填充的字段:
 * video.arcurl
 * video.tag
 * video.danmaku
-* video.author
-* video.favorites
+* video.name
+* video.favorite
 * video.duration
 * video.type
 * video.arcurl
@@ -425,7 +429,7 @@ Bangumi类填充的字段:
     * bangumi.areas_name
     * bangumi.evaluate
     * bangumi.jp_title
-    * bangumi.link
+    * bangumi.arcurl
     * bangumi.media_id
     * bangumi.newest_ep
     * bangumi.is_finish
@@ -480,7 +484,7 @@ Bangumi类填充的字段:
 * episode.index
 * episode.index_title
 * episode.pub_real_time
-* episode.link
+* episode.arcurl
 
 ---
 
@@ -528,7 +532,7 @@ def danmaku2ass(xmlfile, asspath=os.path.expanduser('~')+'/Desktop/'):
 即是以上两个函数的合并
 
 ```python
-def saveDanmuku(cid, path=os.path.expanduser('~')+'/Desktop/'):
+def saveDanmuku(cid, path=os.path.expanduser('~')):
 ```
 
 * 指定路径保存弹幕为ass文件
@@ -596,9 +600,8 @@ class Video():
         self.cid = None # chat id 即弹幕池号
         self.copyright = None # 是否拥有版权 官方2 用户1 没有-1
         self.desc = None # 视频描述
-        self.author = None # 作者
         self.pic = None # 视频封面 或 番剧该集的封面
-        self.pubdate = None # 发布时间 有时是按秒计有时是时间字符串 
+        self.pubdate = None # 发布时间 按秒计
         self.tname = None # 投稿分区名   json中的 'typename' 与此相同
         self.tid = None # 投稿分区的序号
         self.videos = None # 猜测是 分p数
@@ -619,15 +622,16 @@ class Video():
         self.play = None # 播放量  json中的 'view' 与此相同
         self.danmaku = None # 弹幕总量 json中的 'vedio_review' 与此相同
         self.review = None # 评论数  json中的 'reply' 与此相同
-        self.favorites = None # 收藏数 番剧的话是追番人数
+        self.favorite = None # 收藏数 番剧的话是追番人数
         self.coin = None # 硬币
         self.share = None # 分享数
         self.like = None
         self.now_rank = None # 当前排名
         self.his_rank = None # 历史排名
+
         # 意义不明 或 没有用到
         self.attribute = None
-        self.ctime = None  # 好像与pubtime是一样的
+        self.ctime = None  # 不明 比pubtime多几秒
         self.dynamic = None  # 不明 有的是标签 但是与tag格式不同 有的不知道是什么信息
         self.state = None
         self.dislike = None
@@ -650,8 +654,8 @@ class Episode():
         self.From = None
         self.index = None # 第几话
         self.index_title = None # 该话标题
-        self.pub_real_time = None # 发布时间
-        self.link = None # 观看地址
+        self.pub_real_time = None # 发布时间 字符串
+        self.arcurl = None # 观看地址
         self.srcurl = None # 视频源地址
         self.media_id = None # 番剧号
         self.episode_status = None
@@ -688,7 +692,7 @@ class Bangumi():
         self.areas_name = None
         self.evaluate = None # 简介
         self.jp_title = None
-        self.link = None # 番剧主页
+        self.arcurl = None # 番剧主页
         self.media_id = None # 番剧号     season_id 与此相同
         self.newest_ep = None # 最新一话
         self.is_finish = None

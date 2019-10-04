@@ -15,9 +15,8 @@ class Video():
         self.cid = None # chat id 即弹幕池号
         self.copyright = None # 是否拥有版权 官方2 用户1 没有-1
         self.desc = None # 视频描述
-        self.author = None # 作者
         self.pic = None # 视频封面 或 番剧该集的封面
-        self.pubdate = None # 发布时间 有时是按秒计有时是时间字符串 
+        self.pubdate = None # 发布时间 按秒计
         self.tname = None # 投稿分区名   json中的 'typename' 与此相同
         self.tid = None # 投稿分区的序号
         self.videos = None # 猜测是 分p数
@@ -38,15 +37,16 @@ class Video():
         self.play = None # 播放量  json中的 'view' 与此相同
         self.danmaku = None # 弹幕总量 json中的 'vedio_review' 与此相同
         self.review = None # 评论数  json中的 'reply' 与此相同
-        self.favorites = None # 收藏数 番剧的话是追番人数
+        self.favorite = None # 收藏数 番剧的话是追番人数
         self.coin = None # 硬币
         self.share = None # 分享数
         self.like = None
         self.now_rank = None # 当前排名
         self.his_rank = None # 历史排名
+
         # 意义不明 或 没有用到
         self.attribute = None
-        self.ctime = None  # 好像与pubtime是一样的
+        self.ctime = None  # 不明 比pubtime多几秒
         self.dynamic = None  # 不明 有的是标签 但是与tag格式不同 有的不知道是什么信息
         self.state = None
         self.dislike = None
@@ -66,8 +66,8 @@ class Episode():
         self.From = None
         self.index = None # 第几话
         self.index_title = None # 该话标题
-        self.pub_real_time = None # 发布时间
-        self.link = None # 观看地址
+        self.pub_real_time = None # 发布时间 字符串
+        self.arcurl = None # 观看地址
         self.srcurl = None # 视频源地址
         self.media_id = None # 番剧号
         self.episode_status = None
@@ -101,7 +101,7 @@ class Bangumi():
         self.areas_name = None
         self.evaluate = None # 简介
         self.jp_title = None
-        self.link = None # 番剧主页
+        self.arcurl = None # 番剧主页
         self.media_id = None # 番剧号     season_id 与此相同
         self.newest_ep = None # 最新一话
         self.is_finish = None

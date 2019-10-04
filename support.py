@@ -90,7 +90,7 @@ class JsonInfo():
                 self.ERROR_MSG = self.info['error']
             self.error = True
         # 2
-        if 'error' in self.info and 'code' in self.info['error']:
+        if 'error' in self.info and self.info['error'] and 'code' in self.info['error']:
             logging.error("code={0}, msg={1}".format(self.info['error']['code'], self.info['error']['message']))
             self.ERROR_MSG = self.info['error']['message']
             self.error = True

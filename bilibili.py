@@ -99,8 +99,8 @@ def getHotVideo(begintime, endtime, tid=33, sortType=TYPE_BOFANG, page=1, pagesi
         video.arcurl = video_idx['arcurl']
         video.tag = video_idx['tag'].split(',')
         video.danmaku = video_idx['video_review']
-        video.author = video_idx['author']
-        video.favorites = video_idx['favorites']
+        video.name = video_idx['author']
+        video.favorite = video_idx['favorites']
         video.duration = num2duration(video_idx['duration'])
         video.type = video_idx['type']
         VideoList.append(video)
@@ -138,7 +138,7 @@ def getVideoInfo(aid, pid=1):
         video.tname = jsoninfo['videoData', 'tname']
         video.pic = jsoninfo['videoData', 'pic']
         video.title = jsoninfo['videoData', 'title']
-        video.pubdate = num2time(jsoninfo['videoData', 'pubdate']) # 看下这里pubtime有没有可能为字符串 否则处理错误
+        video.pubdate = num2time(jsoninfo['videoData', 'pubdate'])
         video.ctime = num2time(jsoninfo['videoData', 'ctime'])
         video.desc = jsoninfo['videoData', 'desc']
         video.state = jsoninfo['videoData', 'state']
@@ -148,15 +148,15 @@ def getVideoInfo(aid, pid=1):
         video.face = jsoninfo['videoData', 'owner', 'face']
         video.name = jsoninfo['videoData', 'owner', 'name']
         video.dislike = jsoninfo['videoData', 'stat', 'dislike']
-        video.cid = jsoninfo['videoData', 'pages'][video.pid-1]['cid'] # 提示错误 不明 运行没问题
+        video.cid = jsoninfo['videoData', 'pages'][video.pid-1]['cid']
         video.tag = []
         for tag in iter(jsoninfo['tags']):
             video.tag.append(tag['tag_name'])
         # 获取视频热度信息 播放量 硬币 收藏 评论 分享 弹幕
         jsoninfo = getVideoStat(video.aid)
-        video.play = jsoninfo['view']
+        video.play = jsoninfo['play']
         video.danmaku = jsoninfo['danmaku']
-        video.review = jsoninfo['reply']
+        video.review = jsoninfo['review']
         video.favorite = jsoninfo['favorite']
         video.coin = jsoninfo['coin']
         video.share = jsoninfo['share']
@@ -174,22 +174,22 @@ def getVideoInfo(aid, pid=1):
         episode = Episode(aid)
         episode.cover = jsoninfo['epInfo', 'cover']
         episode.title = jsoninfo['mediaInfo', 'title']
-        episode.index_title = jsoninfo['epInfo', 'index_title']
-        episode.index = jsoninfo['epInfo', 'index']
-        episode.pub_real_time = jsoninfo['epInfo', 'pub_real_time'] # 看下这里pubtime有没有可能为字符串
-        # 新版返回的api返回的json中没有视频时长信息 只能通过解析xml方式获得
+        episode.index_title = jsoninfo['epInfo', 'longTitle']
+        episode.index = jsoninfo['epInfo', 'i']
+        episode.pub_real_time = jsoninfo['mediaInfo', 'pub', 'time']
+        # 新版返回的api返回的json中没有视频时长信息 只能用获取在线人数的那个api解析xml方式获得
         # episode.duration = num2duration(jsoninfo['epInfo', 'duration'] // 1000)
-        episode.mid = jsoninfo['epInfo', 'mid']
+        episode.mid = jsoninfo['upInfo', 'mid']
         episode.cid = jsoninfo['epInfo', 'cid']
-        episode.media_id = jsoninfo['mediaInfo', 'media_id']
-        episode.episode_status = jsoninfo['epInfo', 'episode_status']
-        episode.ep_id = jsoninfo['epInfo', 'ep_id']
+        episode.media_id = jsoninfo['mediaInfo', 'id']
+        episode.episode_status = jsoninfo['epInfo', 'epStatus']
+        episode.ep_id = jsoninfo['epInfo', 'id']
         episode.vid = jsoninfo['epInfo', 'vid']
         # 获取剧集热度信息 播放量 硬币 收藏 评论 分享 弹幕   这是单一剧集的热度 而不是整个番剧的
         jsoninfo = getVideoStat(episode.aid)
-        episode.play = jsoninfo['view']
+        episode.play = jsoninfo['play']
         episode.danmaku = jsoninfo['danmaku']
-        episode.review = jsoninfo['reply']
+        episode.review = jsoninfo['review']
         episode.favorite = jsoninfo['favorite']
         episode.coin = jsoninfo['coin']
         episode.share = jsoninfo['share']
@@ -199,7 +199,8 @@ def getVideoInfo(aid, pid=1):
         episode.copyright = jsoninfo['copyright']
         # 获取当前观看人数
         episode.online_count = getOnlineCount(episode.aid, episode.cid)
-        episode.link = 'https://www.bilibili.com/bangumi/play/ep{0}'.format(episode.ep_id)
+
+        episode.arcurl = 'https://www.bilibili.com/bangumi/play/ep{0}'.format(episode.ep_id)
         episode.srcurl = getEpisodeSrcurl(episode.cid)
         return episode
 
@@ -225,14 +226,17 @@ def biliVideoSearch(keyword, sortType=TYPE_BOFANG, duration=0, tids_1=0, tids_2=
     if VideoInfo:
         VideoInfo = VideoInfo.group(3) # 获取捕获组
         jsoninfo = JsonInfo(VideoInfo)
-        if jsoninfo['apiErrorCode'] != 0: # 确认是否成功获取搜索信息
+        if jsoninfo.error: # 确认是否成功获取搜索信息
             logging.error('获取搜索信息失败 >_<')
             return [], url
     else:
         logging.error('正则表达式查找视频信息失败 >_<')
         return [], url
+
     VideoList = []
-    for video_idx in iter(jsoninfo['videoData']):
+    result = getRE(VideoInfo, r'({"result":.+?})}')
+    result = JsonInfo(result[0])
+    for video_idx in result['result']:
         video = Video(video_idx['id'], getREsub(video_idx['title'], '', '<[^>]+>')) # 若title有关键字会用Html标签标记 需要去掉
         video.play = video_idx['play']
         video.desc = video_idx['description']
@@ -243,8 +247,8 @@ def biliVideoSearch(keyword, sortType=TYPE_BOFANG, duration=0, tids_1=0, tids_2=
         video.arcurl = video_idx['arcurl']
         video.tag = video_idx['tag'].split(',')
         video.danmaku = video_idx['video_review']
-        video.author = video_idx['author']
-        video.favorites = video_idx['favorites']
+        video.name = video_idx['author']
+        video.favorite = video_idx['favorites']
         video.duration = video_idx['duration']
         video.type = video_idx['type']
         video.arcurl = 'https://www.bilibili.com/video/av{0}'.format(video.aid)
@@ -267,14 +271,15 @@ def biliBangumiSearch(keyword, page=1):
     if VideoInfo:
         VideoInfo = VideoInfo.group(3) # 获取捕获组
         jsoninfo = JsonInfo(VideoInfo)
-        if jsoninfo['apiErrorCode'] != 0: # 确认是否成功获取搜索信息
+        if jsoninfo.error: # 确认是否成功获取搜索信息
             logging.error('获取搜索信息失败 >_<')
             return [], url1
     else:
         logging.error('正则表达式查找视频信息失败 >_<')
         return [], url1
+
     media_id = getRE(VideoInfo, r'"media_id":(\d+),')
-    media_score = getRE(VideoInfo, r'"media_score":(.+?),"c')
+    media_score = getRE(VideoInfo, r'"media_score":({.+?}),')
     bangumis = []
     for idx, val in enumerate(media_id):
         url2 = 'https://bangumi.bilibili.com/view/web_api/season?media_id=' + val
@@ -289,7 +294,7 @@ def biliBangumiSearch(keyword, page=1):
         bangumi.areas_name = result['areas'][0]['name']
         bangumi.evaluate = result['evaluate']
         bangumi.jp_title = result['jp_title']
-        bangumi.link = result['link']
+        bangumi.arcurl = result['link']
         bangumi.media_id = result['media_id']
         bangumi.newest_ep = result['newest_ep']
         bangumi.is_finish = result['publish']['is_finish']
@@ -332,19 +337,7 @@ def biliBangumiSearch(keyword, page=1):
             episode.index_title = ep['index_title'] # 该话标题
             episode.pub_real_time = ep['pub_real_time'] # 发布时间
             if episode.ep_id:
-                episode.link = 'https://www.bilibili.com/bangumi/play/ep{0}'.format(episode.ep_id) # 观看地址
-            # 热度信息   这里要获取热度信息 很费时间
-            # url3 = 'https://api.bilibili.com/x/web-interface/archive/stat?aid={0}'.format(episode.aid)
-            # stat = JsonInfo(getURLContent(url3))
-            # episode.play = stat['data', 'view']
-            # episode.danmaku = stat['data', 'danmaku']
-            # episode.review = stat['data', 'reply']
-            # episode.favorite = stat['data', 'favorite']
-            # episode.coin = stat['data', 'coin']
-            # episode.share = stat['data', 'share']
-            # episode.like = stat['data', 'like']
-            # episode.now_rank = stat['data', 'now_rank']
-            # episode.his_rank = stat['data', 'his_rank']
+                episode.arcurl = 'https://www.bilibili.com/bangumi/play/ep{0}'.format(episode.ep_id) # 观看地址
 
             # up
             episode.mid = ep['mid'] 
@@ -371,7 +364,8 @@ def biliBangumiSearch(keyword, page=1):
         bangumi.mode = result['mode']
 
         bangumis.append(bangumi)
-    return bangumis
+    
+    return bangumis, url1
 
 def getAid(url):
     """
@@ -401,8 +395,9 @@ def getAid(url):
             return None
         
         aid = jsoninfo['epInfo', 'aid']
+        if aid == -1:
+            aid = jsoninfo['epList'][0]['aid']
         return aid
-
 
 def getVideoStat(aid):
     """
@@ -467,9 +462,10 @@ def getVideoSrcurl(cid):
     secretkey = 'aHRmhWMLkdeMuILqORnYZocwMBpMEOdt'
     params = 'appkey=iVGUTjsxvpLeuDCf&cid={0}&otype=json&qn=80&quality=80&type='.format(cid)
     api_url = video_api_url + params + '&sign=' + getSign(params, secretkey)
-
-    jsoninfo = JsonInfo(getURLContent(api_url))
+    content = getURLContent(api_url)
+    jsoninfo = JsonInfo(content)
     if jsoninfo.error:
+        # logging.error("json解析出错", content)
         return None
     srcurls = []
     for val in jsoninfo['durl']:
@@ -517,6 +513,10 @@ def mpvPlayVideo(aid, pid=1):
             srcurls = getVideoSrcurl(video.cid)
         else:
             srcurls = getEpisodeSrcurl(video.cid)
+            if srcurls == []:
+                logging.error('获取番剧源地址失败 >_<')
+                return
+
             index_title = video.index_title
         paraurls = ''
         for val in srcurls:
@@ -590,8 +590,42 @@ def saveDanmuku(cid, path='./'):
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
-    # mpvPlayVideo(28463616) # 普通视频测试
-    # mpvPlayVideo(33160847) # 番剧测试
-    getAid("https://www.bilibili.com/bangumi/play/ep267864?spm_id_from=333.334.b_72616e6b696e675f74696d696e675f62616e67756d69.1")
-    # a = biliBangumiSearch("jojo")
+
+    # print(getAid("https://www.bilibili.com/bangumi/play/ss26801?spm_id_from=333.334.b_72616e6b696e675f74696d696e675f62616e67756d69.1")) # 获取av号测试
+
+
+    # mpvPlayVideo(28463616) # 普通视频播放测试
+    mpvPlayVideo(4044639) # 番剧播放测试
+
+    # print(biliBangumiSearch("jojo")) # 番剧搜索测试
+    # print(biliVideoSearch("王老菊")) # 视频搜索测试
+    # print(biliBangumiSearch("sdrfrvbr")) 
+    # print(biliVideoSearch("sdrfrvbr"))
+
+    # 视频排行榜测试
+    # v, url = getHotVideo([2019, 10, 1], [2019, 10, 4])
+    # for i in v:
+    #     print(i.title)
+    # print(url)
+
+    # print(getVideoStat(33160847)) # 获取视频状态测试
+
+
+
+    # 获取视频信息测试
+    # e = getVideoInfo(33160847) # 番剧
+    # print(e, e.arcurl)
+    # # 在线人数测试
+    # print(getOnlineCount(e.aid, e.cid))
+    # # 获取视频源地址
+    # print(getEpisodeSrcurl(e.cid))
+
+    # 视频
+    # e = getVideoInfo(28463616)
+    # print(e, e.arcurl)
+    # # 获取视频源地址
+    # print(getVideoSrcurl(e.cid))
+    # # 获取弹幕测试
+    # print(getDanmuku(e.cid))
+
     pass
